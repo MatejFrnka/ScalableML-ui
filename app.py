@@ -14,23 +14,12 @@ def download_data():
     project = hopsworks.login()
     print("Getting feature store")
     fs = project.get_feature_store()
-    try:
-        print("Trying to get feature view")
-        feature_view = fs.get_feature_view(name="fw_upcoming", version=1)
-    except:
-        print("Creating new feature view")
-        fg_football = fs.get_feature_group(name="fg_upcoming", version=2)
-        query = fg_football.select_all()
-        feature_view = fs.create_feature_view(name="fw_upcoming",
-                                              version=1,
-                                              description="Read from upcoming dataset",
-                                              query=query)
-    # feature_view.delete_all_training_datasets()
-    print("Getting batch data")
-    upcoming = feature_view.get_batch_data(
-        start_time=datetime.now(),
-        end_time=datetime.now() + timedelta(days=365),
-    )
+    fg = fs.get_feature_group("fg_upcoming", version=2)
+    query = fg.select_all()
+    upcoming = query.read()
+    upcoming['date'] = pd.to_datetime(upcoming['date'])
+    upcoming = upcoming[upcoming['date'] > datetime.now()]
+
     print("Getting model registry")
     mr = project.get_model_registry()
     print("Getting model")
@@ -62,7 +51,6 @@ st.write("""
 
 buy_col = []
 calculated_at_odds = []
-upcoming['date'] = pd.to_datetime(upcoming['date'])
 upcoming['date_str'] = upcoming['date'].dt.strftime('%d/%m/%Y')
 upcoming = upcoming.sort_values(by=["date"])
 upcoming = upcoming.reset_index(drop=True)
