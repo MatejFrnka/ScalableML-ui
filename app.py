@@ -8,31 +8,29 @@ import hopsworks
 CACHE_TTL = 60 * 60
 
 
-@st.cache(ttl=CACHE_TTL)
-def download_data():
-    print("Logging it")
-    project = hopsworks.login()
-    print("Getting feature store")
-    fs = project.get_feature_store()
-    fg = fs.get_feature_group("fg_upcoming", version=2)
-    query = fg.select_all()
-    upcoming = query.read()
-    upcoming['date'] = pd.to_datetime(upcoming['date'])
-    upcoming = upcoming[upcoming['date'] > datetime.now()]
+print("Logging it")
+project = hopsworks.login()
+print("Getting feature store")
+fs = project.get_feature_store()
+fg = fs.get_feature_group("fg_upcoming", version=2)
+query = fg.select_all()
+upcoming = query.read()
+upcoming['date'] = pd.to_datetime(upcoming['date'])
+upcoming = upcoming[upcoming['date'] > datetime.now()]
 
-    print("Getting model registry")
-    mr = project.get_model_registry()
-    print("Getting model")
-    model = mr.get_best_model(name="metrics_football", metric="date_run", direction="max")
-    print("Downloading model")
-    model_dir = Path(model.download())
-    print(model_dir)
-    with open(model_dir / "metrics.json") as file:
-        metrics = json.load(file)
-    return metrics, upcoming, datetime.now()
+print("Getting model registry")
+mr = project.get_model_registry()
+print("Getting model")
+model = mr.get_best_model(name="metrics_football", metric="date_run", direction="max")
+print("Downloading model")
+model_dir = Path(model.download())
+print(model_dir)
+with open(model_dir / "metrics.json") as file:
+    metrics = json.load(file)
+# return metrics, upcoming, datetime.now()
 
 
-metrics, upcoming, data_updated = download_data()
+# metrics, upcoming, data_updated = download_data()
 upcoming = upcoming.copy()
 
 model_trained_date = datetime.fromtimestamp(metrics['date_run'])
