@@ -10,12 +10,15 @@ CACHE_TTL = 60 * 60
 
 @st.cache(ttl=CACHE_TTL)
 def download_data():
+    print("Logging it")
     project = hopsworks.login()
+    print("Getting feature store")
     fs = project.get_feature_store()
-
     try:
+        print("Trying to get feature view")
         feature_view = fs.get_feature_view(name="fw_upcoming", version=1)
     except:
+        print("Creating new feature view")
         fg_football = fs.get_feature_group(name="fg_upcoming", version=2)
         query = fg_football.select_all()
         feature_view = fs.create_feature_view(name="fw_upcoming",
@@ -23,12 +26,16 @@ def download_data():
                                               description="Read from upcoming dataset",
                                               query=query)
     # feature_view.delete_all_training_datasets()
+    print("Getting batch data")
     upcoming = feature_view.get_batch_data(
         start_time=datetime.now(),
         end_time=datetime.now() + timedelta(days=365),
     )
+    print("Getting model registry")
     mr = project.get_model_registry()
+    print("Getting model")
     model = mr.get_best_model(name="metrics_football", metric="date_run", direction="max")
+    print("Downloading model")
     model_dir = Path(model.download())
     print(model_dir)
     with open(model_dir / "metrics.json") as file:
