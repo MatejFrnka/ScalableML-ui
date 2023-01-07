@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import hopsworks
 
-CACHE_TTL = 60
+CACHE_TTL = 60 * 60
 
 
 @st.cache(ttl=CACHE_TTL)
