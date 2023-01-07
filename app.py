@@ -12,8 +12,12 @@ print("Logging it")
 project = hopsworks.login()
 print("Getting feature store")
 fs = project.get_feature_store()
+print("Getting feature group")
 fg = fs.get_feature_group("fg_upcoming", version=2)
+print(fs.hive_endpoint())
+print("Creating query")
 query = fg.select_all()
+print("Executing query")
 upcoming = query.read()
 upcoming['date'] = pd.to_datetime(upcoming['date'])
 upcoming = upcoming[upcoming['date'] > datetime.now()]
@@ -27,8 +31,8 @@ model_dir = Path(model.download())
 print(model_dir)
 with open(model_dir / "metrics.json") as file:
     metrics = json.load(file)
+data_updated = datetime.now()
 # return metrics, upcoming, datetime.now()
-
 
 # metrics, upcoming, data_updated = download_data()
 upcoming = upcoming.copy()
