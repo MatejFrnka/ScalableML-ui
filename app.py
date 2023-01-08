@@ -15,7 +15,7 @@ def download_data():
     print("Getting feature store")
     fs = project.get_feature_store()
     print("Getting feature group")
-    fg = fs.get_feature_group("fg_upcoming", version=2)
+    fg = fs.get_feature_group("fg_upcoming", version=3)
     print("Creating query")
     query = fg.select_all()
     print("Executing query")
